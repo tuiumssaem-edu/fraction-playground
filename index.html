@@ -1,0 +1,517 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>분수 교구 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 한 화면 고정 — 위쪽 제목+탭, 아래 왼쪽 교구판(그림), 오른쪽 문제 카드 */
+:root{
+  --bg:#f3f6f4; --grid:#e1e8e4; --paper:#ffffff; --ink:#1f2b33; --muted:#5d6b73; --line:#c9d3cf;
+  --t-red:#e25b4b; --t-blue:#3f7fd1; --t-yellow:#f2b632; --t-green:#3ea36b; --t-purple:#8a5cc7;
+  --empty:#eef2f0; --accent:#3f7fd1; --good:#2f8f5b; --bad:#c9483a; --goodbg:#e3f3ea; --badbg:#fbe8e5;
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151c20; --grid:#1c252a; --paper:#1d262b; --ink:#e8eef0; --muted:#9aa9b0; --line:#34434a;
+  --t-red:#f07466; --t-blue:#6aa2ee; --t-yellow:#f5c656; --t-green:#5cc58a; --t-purple:#a984e0;
+  --empty:#28343a; --accent:#6aa2ee; --good:#5cc58a; --bad:#f07466; --goodbg:#1f3a2c; --badbg:#432622; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151c20; --grid:#1c252a; --paper:#1d262b; --ink:#e8eef0; --muted:#9aa9b0; --line:#34434a;
+  --t-red:#f07466; --t-blue:#6aa2ee; --t-yellow:#f5c656; --t-green:#5cc58a; --t-purple:#a984e0;
+  --empty:#28343a; --accent:#6aa2ee; --good:#5cc58a; --bad:#f07466; --goodbg:#1f3a2c; --badbg:#432622; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px}
+.app{height:100%;max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:12px;display:flex;flex-direction:column;gap:10px}
+header{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:400;font-size:28px;margin:0;line-height:1.1}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav button{font-family:var(--display);font-size:16px;border:2px solid var(--line);background:var(--paper);color:var(--muted);
+  padding:6px 14px;border-radius:999px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+main{flex:1;min-height:0}
+.panel{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px}
+.stage{background:var(--paper);border:2px solid var(--ink);border-radius:16px;min-height:0;display:flex;flex-direction:column;padding:14px;gap:8px;position:relative}
+.stage .tag{font-size:13px;color:var(--muted);letter-spacing:.02em}
+.vis{flex:1;min-height:0;width:100%;display:block}
+.side{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
+.card{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-size:13px;color:var(--muted)}
+.q{font-family:var(--display);font-size:22px;line-height:1.35;margin:0;text-wrap:balance}
+.info{background:var(--empty);border-radius:12px;padding:10px 12px;font-size:15px}
+.info b{font-family:var(--display);font-weight:400}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stats span{font-size:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.stats b{font-family:var(--display);font-weight:400;font-size:16px}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--display);line-height:1.02;vertical-align:middle;font-variant-numeric:tabular-nums;margin:0 .1em}
+.frac .n{border-bottom:2.5px solid currentColor;padding:0 .18em}
+.frac .d{padding:0 .18em}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{font-family:var(--display);font-size:22px;min-width:64px;min-height:56px;padding:4px 12px;border-radius:12px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+.opts button:hover:not(:disabled){background:var(--empty)}
+.opts button.right{background:var(--good);border-color:var(--good);color:var(--paper)}
+.opts button.wrong{background:var(--badbg);border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.opts button:disabled{cursor:default}
+.btn{font-family:var(--display);font-size:18px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:12px;padding:8px 18px;cursor:pointer}
+.btn.ghost{background:var(--paper);color:var(--ink)}
+.btn.go{background:var(--good);border-color:var(--good)}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--t-yellow);outline-offset:2px}
+.live{font-size:15px;color:var(--muted)}
+.fb{border-radius:12px;padding:10px 12px;font-size:15px}
+.fb:empty{display:none}
+.fb.ok{background:var(--goodbg);color:var(--ink);border:2px solid var(--good)}
+.fb.no{background:var(--badbg);color:var(--ink);border:2px solid var(--bad)}
+.fb strong{font-family:var(--display);font-weight:400;font-size:18px;display:block}
+.fb.ok strong{color:var(--good)} .fb.no strong{color:var(--bad)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+svg text{font-family:var(--body)}
+.piece{cursor:pointer}
+.piece:hover{opacity:.82}
+.hit{cursor:pointer}
+.hit:hover{fill:var(--empty);fill-opacity:.6}
+/* 게임 */
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hearts{font-size:22px;letter-spacing:2px;color:var(--t-red)}
+.hearts .off{color:var(--line)}
+.score{font-family:var(--display);font-size:24px;font-variant-numeric:tabular-nums}
+.combo{font-family:var(--display);font-size:15px;color:var(--t-purple);min-height:1.4em}
+.timer{height:8px;border-radius:99px;background:var(--empty);overflow:hidden}
+.timer i{display:block;height:100%;background:var(--t-yellow);width:100%}
+.path{width:100%;height:64px;flex:none;display:block}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;min-height:0}
+.center h2{font-family:var(--display);font-weight:400;font-size:34px;margin:0}
+.center p{margin:0;color:var(--muted);max-width:46ch}
+.bigstars{font-size:46px;letter-spacing:6px;color:var(--t-yellow)}
+.bigstars .off{color:var(--line)}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:15px;text-align:left}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+@media (max-width:860px){
+  html,body{height:auto}
+  .app{height:auto}
+  .panel{grid-template-columns:1fr;height:auto}
+  .stage{min-height:340px}
+  .vis{height:300px;flex:none}
+  .side{overflow:visible}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+<header>
+  <h1>분수 교구 놀이터</h1>
+  <nav role="tablist">
+    <button role="tab" id="tab1" aria-selected="true" data-p="1">1. 전체와 부분</button>
+    <button role="tab" id="tab2" aria-selected="false" data-p="2">2. 그림으로 비교</button>
+    <button role="tab" id="tab3" aria-selected="false" data-p="3">3. 수직선으로 비교</button>
+    <button role="tab" id="tab4" aria-selected="false" data-p="4">4. 분수 탐험 게임</button>
+  </nav>
+</header>
+
+<main>
+<!-- 1 -->
+<section class="panel" id="p1">
+  <div class="stage"><span class="tag">분수 모형</span><svg class="vis" id="v1" role="img" aria-label="분수 모형"></svg></div>
+  <div class="side">
+    <div class="card">
+      <span class="eyebrow">목표 ① 분수 모형으로 전체와 부분의 관계 탐색하기</span>
+      <p class="q" id="q1"></p>
+      <div id="a1"></div>
+      <div class="fb" id="f1" aria-live="polite"></div>
+      <div class="row"><button class="btn go" id="n1" hidden>다음 문제 ▶</button></div>
+    </div>
+    <div class="info" id="i1"></div>
+    <div class="stats" id="s1"></div>
+  </div>
+</section>
+<!-- 2 -->
+<section class="panel" id="p2" hidden>
+  <div class="stage"><span class="tag">분수 막대 · 두 막대의 전체 크기는 같아요</span><svg class="vis" id="v2" role="img" aria-label="두 분수 막대"></svg></div>
+  <div class="side">
+    <div class="card">
+      <span class="eyebrow">목표 ② 그림으로 분모가 같은 두 분수의 크기 비교하기</span>
+      <p class="q" id="q2"></p>
+      <div id="a2"></div>
+      <div class="fb" id="f2" aria-live="polite"></div>
+      <div class="row"><button class="btn go" id="n2" hidden>다음 문제 ▶</button></div>
+    </div>
+    <div class="info" id="i2"></div>
+    <div class="stats" id="s2"></div>
+  </div>
+</section>
+<!-- 3 -->
+<section class="panel" id="p3" hidden>
+  <div class="stage"><span class="tag">수직선 · 0과 1 사이를 똑같이 나누었어요</span><svg class="vis" id="v3" role="img" aria-label="수직선"></svg></div>
+  <div class="side">
+    <div class="card">
+      <span class="eyebrow">목표 ② 수직선으로 분모가 같은 두 분수의 크기 비교하기</span>
+      <p class="q" id="q3"></p>
+      <div id="a3"></div>
+      <div class="fb" id="f3" aria-live="polite"></div>
+      <div class="row"><button class="btn go" id="n3" hidden>다음 문제 ▶</button></div>
+    </div>
+    <div class="info" id="i3"></div>
+    <div class="stats" id="s3"></div>
+  </div>
+</section>
+<!-- 4 -->
+<section class="panel" id="p4" hidden>
+  <div class="stage">
+    <svg class="path" id="path" viewBox="0 0 760 64" preserveAspectRatio="xMidYMid meet" aria-label="탐험 길"></svg>
+    <svg class="vis" id="v4" role="img" aria-label="게임 문제 그림"></svg>
+    <div class="center" id="intro">
+      <h2>분수 탐험 게임</h2>
+      <p>분수 모형, 분수 막대, 수직선 문제를 풀면서 깃발까지 12칸을 가 보세요. 문제는 갈수록 조금씩 어려워져요.</p>
+      <div class="rules">
+        <span>❤️</span><span>목숨은 3개. 틀리면 하나씩 줄어요.</span>
+        <span>⏱️</span><span>빨리 맞힐수록 보너스 점수가 커요.</span>
+        <span>🔥</span><span>연속으로 맞히면 콤보 점수가 붙어요.</span>
+      </div>
+      <button class="btn go" id="start">탐험 시작!</button>
+    </div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <div class="hud"><span class="hearts" id="hearts"></span><span class="score" id="score">0점</span></div>
+      <div class="timer"><i id="tbar"></i></div>
+      <span class="combo" id="combo"></span>
+    </div>
+    <div class="card">
+      <span class="eyebrow" id="gstep">시작을 누르면 문제가 나와요</span>
+      <p class="q" id="q4">모든 활동을 아우르는 종합 게임이에요.</p>
+      <div id="a4"></div>
+      <div class="fb" id="f4" aria-live="polite"></div>
+      <div class="row"><button class="btn go" id="n4" hidden>다음 칸으로 ▶</button></div>
+    </div>
+    <div class="stats" id="best"></div>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a={},txt)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e};
+const F=(n,d)=>`<span class="frac"><span class="n">${n}</span><span class="d">${d}</span></span>`;
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const cmp=(a,b)=>a>b?">":a<b?"<":"=";
+const RANGE=[[2,5],[3,8],[4,10],[5,12]];
+const pickD=lv=>{const[a,b]=RANGE[Math.min(lv,3)];return rnd(a,b)};
+const lvOf=t=>Math.floor(t.ok/4);
+
+/* 탭 */
+$$("nav button").forEach(b=>b.onclick=()=>{
+  $$("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  [1,2,3,4].forEach(p=>$("#p"+p).hidden=String(p)!==b.dataset.p);
+  if(b.dataset.p!=="4")stopTimer();
+});
+
+/* ---------- 그리기 도구 ---------- */
+function drawModel(svg,{shape,d,filled,color="var(--t-yellow)",onClick,numbers}){
+  svg.innerHTML="";const pieces=[],centers=[];
+  if(shape==="circle"){
+    svg.setAttribute("viewBox","0 0 300 300");
+    const cx=150,cy=150,r=138;
+    for(let i=0;i<d;i++){
+      const a0=(-90+360*i/d)*Math.PI/180,a1=(-90+360*(i+1)/d)*Math.PI/180,am=(a0+a1)/2;
+      const p=d===1?el("circle",{cx,cy,r}):el("path",{d:`M${cx},${cy} L${cx+r*Math.cos(a0)},${cy+r*Math.sin(a0)} A${r},${r} 0 ${d===2?0:0} 1 ${cx+r*Math.cos(a1)},${cy+r*Math.sin(a1)} Z`});
+      pieces.push(p);centers.push(d===1?[cx,cy]:[cx+r*.62*Math.cos(am),cy+r*.62*Math.sin(am)]);
+    }
+  }else{
+    let rows=1,cols=d;
+    if(shape==="rect"){for(let r=Math.floor(Math.sqrt(d));r>=1;r--)if(d%r===0){rows=r;cols=d/r;break}}
+    const W=280,H=shape==="bar"?90:280;
+    svg.setAttribute("viewBox",`0 0 300 ${H+20}`);
+    const cw=W/cols,ch=H/rows;
+    for(let i=0;i<d;i++){const r=Math.floor(i/cols),c=i%cols;
+      pieces.push(el("rect",{x:10+c*cw,y:10+r*ch,width:cw,height:ch}));centers.push([10+c*cw+cw/2,10+r*ch+ch/2]);}
+  }
+  pieces.forEach((p,i)=>{
+    p.setAttribute("fill",filled[i]?color:"var(--empty)");p.setAttribute("stroke","var(--ink)");p.setAttribute("stroke-width",2.5);p.setAttribute("stroke-linejoin","round");
+    if(onClick){p.classList.add("piece");p.setAttribute("tabindex","0");p.setAttribute("role","button");p.setAttribute("aria-label",`${i+1}번째 조각`);
+      p.onclick=()=>onClick(i,p);p.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(i,p)}};}
+    svg.appendChild(p);
+  });
+  if(numbers){let c=0;const fs=shape==="circle"?Math.max(13,32-d*1.6):Math.min(26,Math.max(12,240/d*.45));
+    numbers.forEach((on,i)=>{if(on){c++;svg.appendChild(el("text",{x:centers[i][0],y:centers[i][1]+fs*.36,"text-anchor":"middle","font-size":fs,fill:"var(--ink)","font-weight":"700","pointer-events":"none"},c))}});}
+  return pieces;
+}
+function fracText(g,x,y,n,d,color,fs=22){
+  g.appendChild(el("text",{x,y,"text-anchor":"middle","font-size":fs,fill:color,"font-weight":"700"},n));
+  g.appendChild(el("line",{x1:x-fs*.6,y1:y+fs*.3,x2:x+fs*.6,y2:y+fs*.3,stroke:color,"stroke-width":2.5}));
+  g.appendChild(el("text",{x,y:y+fs*1.15,"text-anchor":"middle","font-size":fs,fill:color,"font-weight":"700"},d));
+}
+function drawBars(svg,{d,rows,numbers,onPick,showFrac=true,mark}){
+  svg.innerHTML="";const H=rows.length*110+10;svg.setAttribute("viewBox",`0 0 680 ${H}`);
+  const x0=120,W=540,h=70;
+  rows.forEach((r,k)=>{
+    const y=20+k*110,w=W/d;
+    svg.appendChild(el("text",{x:24,y:y+h/2+9,"text-anchor":"middle","font-size":26,fill:r.color,"font-weight":"700"},r.label));
+    if(showFrac)fracText(svg,76,y+h/2-6,r.n,d,r.color,22);
+    for(let i=0;i<d;i++){
+      svg.appendChild(el("rect",{x:x0+i*w,y,width:w,height:h,fill:i<r.n?r.color:"var(--empty)",stroke:"var(--ink)","stroke-width":2.5}));
+      if(numbers&&i<r.n)svg.appendChild(el("text",{x:x0+i*w+w/2,y:y+h/2+8,"text-anchor":"middle","font-size":Math.min(24,w*.5),fill:"var(--paper)","font-weight":"700"},i+1));
+    }
+    if(mark===k)svg.appendChild(el("rect",{x:x0-6,y:y-6,width:W+12,height:h+12,rx:8,fill:"none",stroke:"var(--good)","stroke-width":4}));
+    if(onPick){const hit=el("rect",{x:x0,y,width:W,height:h,fill:"transparent",class:"hit",tabindex:0,role:"button","aria-label":`${r.label} 막대 고르기`});
+      hit.onclick=()=>onPick(k);hit.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onPick(k)}};svg.appendChild(hit);}
+  });
+}
+function drawLine(svg,{d,marks=[],onPick,hint}){
+  svg.innerHTML="";svg.setAttribute("viewBox","0 0 700 200");
+  const x0=50,W=600,y=100;
+  svg.appendChild(el("line",{x1:x0-24,y1:y,x2:x0+W+26,y2:y,stroke:"var(--ink)","stroke-width":3}));
+  svg.appendChild(el("path",{d:`M${x0+W+28},${y} l-12,-8 v16 z`,fill:"var(--ink)"}));
+  for(let i=0;i<=d;i++){const x=x0+W*i/d,m=i===0||i===d;
+    svg.appendChild(el("line",{x1:x,y1:y-(m?18:12),x2:x,y2:y+(m?18:12),stroke:"var(--ink)","stroke-width":m?3:2}));
+    if(m)svg.appendChild(el("text",{x,y:y+46,"text-anchor":"middle","font-size":24,fill:"var(--ink)","font-weight":"700"},i?"1":"0"));
+    if(hint&&i>0)svg.appendChild(el("text",{x:x0+W*(i-.5)/d,y:y+26,"text-anchor":"middle","font-size":14,fill:"var(--muted)"},i));
+  }
+  marks.forEach(m=>{const x=x0+W*m.n/d;
+    svg.appendChild(el("circle",{cx:x,cy:y,r:11,fill:m.color,stroke:"var(--paper)","stroke-width":3}));
+    if(m.up){ if(m.frac)fracText(svg,x,24,m.n,d,m.color,20); if(m.label)svg.appendChild(el("text",{x,y:y-24,"text-anchor":"middle","font-size":20,fill:m.color,"font-weight":"700"},m.label)); }
+    else{ if(m.label)svg.appendChild(el("text",{x,y:y+38,"text-anchor":"middle","font-size":20,fill:m.color,"font-weight":"700"},m.label)); if(m.frac)fracText(svg,x,y+62,m.n,d,m.color,20); }
+  });
+  if(onPick)for(let i=0;i<=d;i++){const x=x0+W*i/d,w=W/d;
+    const h=el("rect",{x:x-w/2,y:y-40,width:w,height:80,fill:"transparent",class:"hit",tabindex:0,role:"button","aria-label":`${i}번째 눈금`});
+    h.onclick=()=>onPick(i);h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onPick(i)}};svg.appendChild(h);}
+}
+function optionBtns(box,list,ans,onAns,{game=false}={}){
+  box.innerHTML="";const w=document.createElement("div");w.className="opts";
+  const btns=list.map(o=>{const b=document.createElement("button");
+    b.innerHTML=String(o).includes("/")?F(...String(o).split("/")):o;
+    b.setAttribute("aria-label",String(o).replace("/","분의 "));
+    b.onclick=()=>{const ok=String(o)===String(ans);
+      if(ok||game){btns.forEach(x=>{x.disabled=true;if(String(x.dataset.v)===String(ans))x.classList.add("right")});if(!ok)b.classList.add("wrong")}
+      else{b.classList.add("wrong");b.disabled=true}
+      onAns(ok,o)};
+    b.dataset.v=o;w.appendChild(b);return b});
+  box.appendChild(w);
+}
+function fracOpts(n,d){
+  const s=new Set([`${n}/${d}`]);
+  [`${d-n}/${d}`,`${n}/${d+1}`,`${n+1}/${d}`,`${n-1}/${d}`,`${n}/${d-1}`].forEach(x=>{const[a,b]=x.split("/").map(Number);if(a>0&&b>1&&a<=b&&s.size<4)s.add(x)});
+  while(s.size<4){const dd=rnd(2,10);s.add(`${rnd(1,dd)}/${dd}`)}
+  return shuffle([...s]);
+}
+const signOpts=[">","=","<"];
+function fb(id,ok,title,body){const e=$(id);e.className="fb "+(ok?"ok":"no");e.innerHTML=`<strong>${title}</strong>${body||""}`;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+function stats(id,t){const lv=lvOf(t);$(id).innerHTML=`<span>맞힌 문제 <b>${t.ok}</b></span><span>연속 정답 <b>${t.streak}</b></span><span>레벨 <b>${lv+1}</b> · 분모 ${RANGE[Math.min(lv,3)].join("~")}</span>`}
+function praise(t){const lvBefore=lvOf({ok:t.ok-1});return lvOf(t)>lvBefore&&lvOf(t)<=3?`<br>🎉 레벨 ${lvOf(t)+1}! 이제 분모가 더 큰 분수도 나와요.`:""}
+
+/* ---------- 1. 전체와 부분 ---------- */
+const t1={ok:0,streak:0,q:null};
+function new1(){
+  const lv=lvOf(t1),d=pickD(lv),n=rnd(1,d-1),shape=pick(["circle","rect","bar"]);
+  const type=pick(["color","color","read","unread"]);
+  const filled=Array(d).fill(false);
+  if(type!=="color"){const idx=lv>=1?shuffle([...Array(d).keys()]).slice(0,n):[...Array(n).keys()];idx.forEach(i=>filled[i]=true)}
+  t1.q={d,n,shape,type,filled,done:false,tries:0};
+  $("#f1").className="fb";$("#f1").innerHTML="";$("#n1").hidden=true;
+  render1();stats("#s1",t1);
+}
+function render1(){
+  const q=t1.q,v=$("#v1");
+  $("#i1").innerHTML=`전체를 똑같이 <b>${q.d}</b>조각으로 나누었어요.<br>한 조각은 전체의 ${F(1,q.d)}이에요. 분모 <b>${q.d}</b>는 전체를 나눈 조각 수예요.`;
+  if(q.type==="color"){
+    $("#q1").innerHTML=`전체의 ${F(q.n,q.d)}만큼 색칠해 보세요.`;
+    const live=()=>{const k=q.filled.filter(Boolean).length;$("#live1").innerHTML=`지금 색칠한 부분: ${F(k,q.d)}`};
+    drawModel(v,{...q,onClick:q.done?null:(i,p)=>{q.filled[i]=!q.filled[i];p.setAttribute("fill",q.filled[i]?"var(--t-yellow)":"var(--empty)");live()},numbers:q.done?q.filled:null});
+    if(!q.done){$("#a1").innerHTML=`<div class="row"><span class="live" id="live1"></span><button class="btn" id="chk1">확인</button></div>`;live();$("#chk1").onclick=check1;}
+  }else{
+    const ans=q.type==="read"?q.n:q.d-q.n;
+    $("#q1").innerHTML=q.type==="read"?"색칠한 부분은 전체의 얼마일까요?":"색칠하지 <u>않은</u> 부분은 전체의 얼마일까요?";
+    drawModel(v,{...q,numbers:q.done?q.filled.map(f=>q.type==="read"?f:!f):null});
+    if(!q.done)optionBtns($("#a1"),fracOpts(ans,q.d),`${ans}/${q.d}`,ok=>{
+      if(ok)win1(`전체 ${q.d}조각 중 ${q.type==="read"?"색칠한":"색칠하지 않은"} 조각이 ${ans}개이므로 ${ans}/${q.d}이에요.`);
+      else{t1.streak=0;stats("#s1",t1);fb("#f1",false,"다시 생각해 보세요",q.type==="read"?`분모는 전체 조각 수(${q.d}), 분자는 색칠한 조각 수예요.`:"색칠하지 않은 빈 조각을 하나씩 세어 보세요.")}
+    });
+  }
+}
+function check1(){
+  const q=t1.q,k=q.filled.filter(Boolean).length;
+  if(k===q.n){win1(`전체를 똑같이 ${q.d}조각으로 나눈 것 중 ${q.n}조각을 색칠했으니 ${q.n}/${q.d}이에요. 색칠하지 않은 부분은 ${q.d-q.n}/${q.d}이에요.`);$("#a1").innerHTML="";}
+  else{t1.streak=0;stats("#s1",t1);fb("#f1",false,k<q.n?"조금 더 색칠해야 해요":"너무 많이 색칠했어요",`분자 ${q.n}은 색칠할 조각 수예요. 지금은 ${k}조각을 색칠했어요.`)}
+}
+function win1(msg){const q=t1.q;q.done=true;t1.ok++;t1.streak++;fb("#f1",true,"정답이에요!",msg+praise(t1));render1();$("#a1").innerHTML="";$("#n1").hidden=false;$("#n1").focus();stats("#s1",t1)}
+$("#n1").onclick=new1;
+
+/* ---------- 2. 그림 비교 ---------- */
+const t2={ok:0,streak:0,q:null};
+function new2(){
+  const d=pickD(lvOf(t2));let a=rnd(1,d),b=rnd(1,d);
+  let type=pick(["sign","sign","big","small"]);
+  if(type==="sign"&&Math.random()<.12)b=a;else while(b===a)b=rnd(1,d);
+  t2.q={d,a,b,type,done:false,hint:false,mark:null};
+  $("#f2").className="fb";$("#f2").innerHTML="";$("#n2").hidden=true;
+  render2();stats("#s2",t2);
+}
+function render2(){
+  const q=t2.q,rows=[{label:"가",n:q.a,color:"var(--t-blue)"},{label:"나",n:q.b,color:"var(--t-red)"}];
+  $("#i2").innerHTML=`두 막대 모두 전체를 똑같이 <b>${q.d}</b>조각으로 나누었어요.<br>그래서 조각 하나의 크기(${F(1,q.d)})가 같아요. 색칠한 조각 수를 견주어 보세요.`;
+  const pickBar=q.type!=="sign"&&!q.done;
+  drawBars($("#v2"),{d:q.d,rows,numbers:q.hint||q.done,mark:q.mark,onPick:pickBar?k=>{
+    const want=q.type==="big"?(q.a>q.b?0:1):(q.a<q.b?0:1);
+    if(k===want){q.mark=k;win2()}else{q.hint=true;t2.streak=0;stats("#s2",t2);render2();fb("#f2",false,"다시 골라 보세요","막대 안에 조각 수를 적어 두었어요. 색칠한 조각이 몇 개인지 세어 보세요.")}
+  }:null});
+  if(q.type==="sign"){
+    $("#q2").innerHTML=`○ 안에 알맞은 기호는?<br><span style="color:var(--t-blue)">${F(q.a,q.d)}</span> ○ <span style="color:var(--t-red)">${F(q.b,q.d)}</span>`;
+    if(!q.done)optionBtns($("#a2"),signOpts,cmp(q.a,q.b),ok=>{if(ok)win2();else{q.hint=true;t2.streak=0;stats("#s2",t2);render2();fb("#f2",false,"다시 생각해 보세요","막대에 색칠한 조각마다 번호를 붙였어요. 어느 쪽이 더 많은가요?")}});
+  }else{
+    $("#q2").innerHTML=`가와 나 중에서 더 <u>${q.type==="big"?"큰":"작은"}</u> 분수의 막대를 눌러 보세요.`;
+    if(!q.done)$("#a2").innerHTML=`<span class="live">왼쪽 그림의 막대를 직접 눌러요.</span>`;
+  }
+}
+function explain(a,b,d){
+  if(a===b)return `두 분수 모두 ${F(1,d)}이 ${a}개라서 크기가 같아요.`;
+  const[x,y]=a>b?[a,b]:[b,a];
+  return `${F(x,d)}은 ${F(1,d)}이 ${x}개, ${F(y,d)}은 ${F(1,d)}이 ${y}개예요. 분모가 같으면 <b>분자가 클수록</b> 더 큰 분수예요. 그래서 ${F(x,d)} &gt; ${F(y,d)}`;
+}
+function win2(){const q=t2.q;q.done=true;t2.ok++;t2.streak++;render2();$("#a2").innerHTML="";fb("#f2",true,"정답이에요!",explain(q.a,q.b,q.d)+praise(t2));$("#n2").hidden=false;$("#n2").focus();stats("#s2",t2)}
+$("#n2").onclick=new2;
+
+/* ---------- 3. 수직선 비교 ---------- */
+const t3={ok:0,streak:0,q:null};
+function new3(){
+  const d=Math.max(3,pickD(lvOf(t3)));let a=rnd(1,d-1),b=rnd(1,d-1);
+  if(Math.random()<.1)b=a;else while(b===a)b=rnd(1,d-1);
+  t3.q={d,a,b,type:pick(["place","place","read"]),step:0,done:false,hint:false};
+  $("#f3").className="fb";$("#f3").innerHTML="";$("#n3").hidden=true;
+  render3();stats("#s3",t3);
+}
+function render3(){
+  const q=t3.q,v=$("#v3"),marks=[];
+  $("#i3").innerHTML=`0과 1 사이를 똑같이 <b>${q.d}</b>칸으로 나누었어요. 한 칸은 ${F(1,q.d)}이에요.<br>수직선에서는 <b>오른쪽에 있을수록 더 큰 분수</b>예요.`;
+  if(q.type==="place"){
+    if(q.step>0)marks.push({n:q.a,color:"var(--t-blue)",label:"가",frac:true,up:true});
+    if(q.step>1)marks.push({n:q.b,color:"var(--t-red)",label:"나",frac:true,up:false});
+    const active=q.step<2;
+    drawLine(v,{d:q.d,marks,hint:q.hint,onPick:active?i=>{
+      const want=q.step===0?q.a:q.b;
+      if(i===want){q.step++;q.hint=false;$("#f3").className="fb";$("#f3").innerHTML="";render3()}
+      else{q.hint=true;t3.streak=0;stats("#s3",t3);render3();fb("#f3",false,"그 자리가 아니에요",`0에서부터 한 칸씩 세어 ${want}칸째 눈금을 찾아보세요. 칸 번호를 적어 두었어요.`)}
+    }:null});
+    if(q.step===0){$("#q3").innerHTML=`<span style="color:var(--t-blue)">가 = ${F(q.a,q.d)}</span>의 자리를 수직선에서 눌러 보세요.`;$("#a3").innerHTML=`<span class="live">1단계 / 3 · 눈금을 직접 눌러요.</span>`}
+    else if(q.step===1){$("#q3").innerHTML=`잘했어요! 이번엔 <span style="color:var(--t-red)">나 = ${F(q.b,q.d)}</span>의 자리를 눌러 보세요.`;$("#a3").innerHTML=`<span class="live">2단계 / 3</span>`}
+    else{$("#q3").innerHTML=`수직선을 보고 ○ 안에 알맞은 기호를 고르세요.<br><span style="color:var(--t-blue)">${F(q.a,q.d)}</span> ○ <span style="color:var(--t-red)">${F(q.b,q.d)}</span>`;
+      if(!q.done)optionBtns($("#a3"),signOpts,cmp(q.a,q.b),ok=>{if(ok)win3();else{t3.streak=0;stats("#s3",t3);fb("#f3",false,"다시 생각해 보세요","가와 나 중에 어느 점이 더 오른쪽에 있나요?")}});}
+  }else{
+    marks.push({n:q.a,color:"var(--t-blue)",label:"가",frac:q.done,up:true},{n:q.b,color:"var(--t-red)",label:"나",frac:q.done,up:false});
+    drawLine(v,{d:q.d,marks,hint:q.hint||q.done});
+    $("#q3").innerHTML=`수직선 위 두 점 <span style="color:var(--t-blue)">가</span>와 <span style="color:var(--t-red)">나</span>가 나타내는 분수를 비교하세요.<br><span style="color:var(--t-blue)">가</span> ○ <span style="color:var(--t-red)">나</span>`;
+    if(!q.done)optionBtns($("#a3"),signOpts,cmp(q.a,q.b),ok=>{if(ok)win3();else{q.hint=true;t3.streak=0;stats("#s3",t3);render3();fb("#f3",false,"다시 생각해 보세요","칸 번호를 보고 각 점이 0에서 몇 칸 떨어져 있는지 세어 보세요.")}});
+  }
+}
+function win3(){const q=t3.q;q.done=true;t3.ok++;t3.streak++;render3();$("#a3").innerHTML="";
+  const[x,y]=q.a>q.b?[q.a,q.b]:[q.b,q.a];
+  fb("#f3",true,"정답이에요!",(q.a===q.b?"두 점이 같은 자리에 있으니 크기가 같아요.":`가는 ${F(q.a,q.d)}, 나는 ${F(q.b,q.d)}이에요. ${F(x,q.d)}이 더 오른쪽에 있으니 더 커요.`)+praise(t3));
+  $("#n3").hidden=false;$("#n3").focus();stats("#s3",t3)}
+$("#n3").onclick=new3;
+
+/* ---------- 4. 게임 ---------- */
+const G={on:false,lives:3,score:0,combo:0,step:0,total:12,locked:false,t0:0,timer:null,right:0};
+const LIMIT=20;
+let best=0;try{best=+localStorage.getItem("fraction-best")||0}catch(e){}
+function drawPath(){
+  const s=$("#path");s.innerHTML="";const n=G.total,x0=30,W=680;
+  s.appendChild(el("line",{x1:x0,y1:40,x2:x0+W,y2:40,stroke:"var(--line)","stroke-width":4,"stroke-dasharray":"2 8","stroke-linecap":"round"}));
+  for(let i=0;i<=n;i++){const x=x0+W*i/n;
+    if(i===n){s.appendChild(el("line",{x1:x,y1:52,x2:x,y2:10,stroke:"var(--ink)","stroke-width":3}));s.appendChild(el("path",{d:`M${x},10 l24,8 l-24,8 z`,fill:"var(--t-red)"}));}
+    else s.appendChild(el("circle",{cx:x,cy:40,r:9,fill:i<G.step?"var(--t-green)":"var(--empty)",stroke:"var(--ink)","stroke-width":2}));}
+  const cx=x0+W*G.step/n;
+  const g=el("g",{transform:`translate(${cx},26)`});
+  g.appendChild(el("circle",{cx:0,cy:0,r:15,fill:"var(--t-yellow)",stroke:"var(--ink)","stroke-width":2.5}));
+  g.appendChild(el("circle",{cx:-5,cy:-3,r:2.2,fill:"var(--ink)"}));g.appendChild(el("circle",{cx:5,cy:-3,r:2.2,fill:"var(--ink)"}));
+  g.appendChild(el("path",{d:"M-6,5 Q0,10 6,5",stroke:"var(--ink)","stroke-width":2,fill:"none"}));
+  s.appendChild(g);
+}
+function hud(){
+  $("#hearts").innerHTML=[0,1,2].map(i=>`<span class="${i<G.lives?"":"off"}">♥</span>`).join("");
+  $("#score").textContent=G.score+"점";
+  $("#combo").textContent=G.combo>=2?`🔥 ${G.combo}연속 정답! 콤보 +${G.combo*20}`:"";
+  $("#best").innerHTML=`<span>최고 점수 <b>${best}</b></span><span>지난 칸 <b>${G.step}</b> / ${G.total}</span>`;
+}
+function stopTimer(){clearInterval(G.timer);G.timer=null}
+function startTimer(){stopTimer();G.t0=Date.now();const bar=$("#tbar");
+  G.timer=setInterval(()=>{const left=Math.max(0,LIMIT-(Date.now()-G.t0)/1000);bar.style.width=(left/LIMIT*100)+"%";if(left<=0)stopTimer()},100)}
+function timeLeft(){return Math.max(0,LIMIT-(Date.now()-G.t0)/1000)}
+
+const gameTypes={
+  color(d){const n=rnd(1,d-1),shape=pick(["circle","rect","bar"]),filled=Array(d).fill(false);
+    return{tag:"분수 모형",text:`전체의 ${F(n,d)}만큼 색칠하고 확인을 누르세요.`,why:`${d}조각 중 ${n}조각을 색칠해야 ${F(n,d)}이에요.`,
+      setup(v,box,submit){drawModel(v,{shape,d,filled,onClick:(i,p)=>{if(G.locked)return;filled[i]=!filled[i];p.setAttribute("fill",filled[i]?"var(--t-yellow)":"var(--empty)")}});
+        box.innerHTML=`<button class="btn">확인</button>`;box.firstChild.onclick=()=>{if(G.locked)return;const k=filled.filter(Boolean).length;box.innerHTML="";submit(k===n,`색칠한 조각은 ${k}개였어요.`)}}}},
+  read(d){const n=rnd(1,d-1),shape=pick(["circle","rect","bar"]),idx=shuffle([...Array(d).keys()]).slice(0,n),filled=Array(d).fill(false);idx.forEach(i=>filled[i]=true);
+    return{tag:"분수 모형",text:"색칠한 부분은 전체의 얼마일까요?",why:`전체 ${d}조각 중 ${n}조각이 색칠되어 ${F(n,d)}이에요.`,
+      setup(v,box,submit){drawModel(v,{shape,d,filled,color:"var(--t-green)"});optionBtns(box,fracOpts(n,d),`${n}/${d}`,ok=>submit(ok),{game:true})}}},
+  unread(d){const n=rnd(1,d-1),shape=pick(["circle","rect","bar"]),filled=Array(d).fill(false);for(let i=0;i<n;i++)filled[i]=true;
+    return{tag:"분수 모형",text:"색칠하지 <u>않은</u> 부분은 전체의 얼마일까요?",why:`빈 조각은 ${d-n}개이므로 ${F(d-n,d)}이에요.`,
+      setup(v,box,submit){drawModel(v,{shape,d,filled,color:"var(--t-purple)"});optionBtns(box,fracOpts(d-n,d),`${d-n}/${d}`,ok=>submit(ok),{game:true})}}},
+  whole(d){const n=rnd(1,d-1),shape=pick(["circle","rect","bar"]),filled=Array(d).fill(false);for(let i=0;i<n;i++)filled[i]=true;
+    const s=new Set([d-n]);[n,d,d-n+1,d-n-1].forEach(x=>{if(x>0&&s.size<4)s.add(x)});while(s.size<4)s.add(rnd(1,d+2));
+    return{tag:"분수 모형",text:`${F(n,d)}만큼 색칠했어요. 전체(1)가 되려면 몇 조각을 더 색칠해야 할까요?`,why:`${F(d,d)}이 전체(1)예요. ${d}조각 중 ${n}조각을 색칠했으니 ${d-n}조각이 더 필요해요.`,
+      setup(v,box,submit){drawModel(v,{shape,d,filled});optionBtns(box,shuffle([...s]).map(x=>x+"조각"),`${d-n}조각`,ok=>submit(ok),{game:true})}}},
+  barSign(d){const a=rnd(1,d);let b=rnd(1,d);if(Math.random()>.15)while(b===a)b=rnd(1,d);
+    return{tag:"분수 막대",text:`○ 안에 알맞은 기호는?<br>${F(a,d)} ○ ${F(b,d)}`,why:explain(a,b,d),
+      setup(v,box,submit){drawBars(v,{d,rows:[{label:"가",n:a,color:"var(--t-blue)"},{label:"나",n:b,color:"var(--t-red)"}]});optionBtns(box,signOpts,cmp(a,b),ok=>submit(ok),{game:true})}}},
+  barPick(d){const a=rnd(1,d);let b=rnd(1,d);while(b===a)b=rnd(1,d);const big=Math.random()<.5;
+    return{tag:"분수 막대",text:`더 <u>${big?"큰":"작은"}</u> 분수의 막대를 눌러 보세요.`,why:explain(a,b,d),
+      setup(v,box,submit){const want=big?(a>b?0:1):(a<b?0:1);box.innerHTML=`<span class="live">왼쪽 그림의 막대를 눌러요.</span>`;
+        drawBars(v,{d,rows:[{label:"가",n:a,color:"var(--t-blue)"},{label:"나",n:b,color:"var(--t-red)"}],onPick:k=>{if(G.locked)return;box.innerHTML="";submit(k===want)}})}}},
+  linePlace(d){const n=rnd(1,d-1);
+    return{tag:"수직선",text:`${F(n,d)}의 자리를 수직선에서 눌러 보세요.`,why:`한 칸이 ${F(1,d)}이니 0에서 ${n}칸 간 자리가 ${F(n,d)}이에요.`,
+      setup(v,box,submit){box.innerHTML=`<span class="live">눈금을 직접 눌러요.</span>`;
+        drawLine(v,{d,onPick:i=>{if(G.locked)return;box.innerHTML="";drawLine(v,{d,hint:true,marks:[{n:i,color:i===n?"var(--good)":"var(--bad)",up:true,frac:true}]});submit(i===n)}})}}},
+  lineRead(d){const n=rnd(1,d-1);const s=new Set([`${n}/${d}`]);[n+1,n-1,d-n].forEach(k=>{if(k>0&&k<d&&s.size<4)s.add(`${k}/${d}`)});s.add(`${n}/${d+1}`);
+    return{tag:"수직선",text:"수직선의 점이 나타내는 분수는?",why:`0과 1 사이를 ${d}칸으로 나누었고, 점은 0에서 ${n}칸 간 자리예요.`,
+      setup(v,box,submit){drawLine(v,{d,marks:[{n,color:"var(--t-purple)",up:true}]});optionBtns(box,shuffle([...s].slice(0,4)),`${n}/${d}`,ok=>submit(ok),{game:true})}}},
+  lineSign(d){const a=rnd(1,d-1);let b=rnd(1,d-1);if(Math.random()>.1)while(b===a)b=rnd(1,d-1);
+    return{tag:"수직선",text:`두 점을 보고 ○ 안에 알맞은 기호를 고르세요.<br><span style="color:var(--t-blue)">가</span> ○ <span style="color:var(--t-red)">나</span>`,
+      why:`가는 ${F(a,d)}, 나는 ${F(b,d)}이에요. 오른쪽에 있는 점이 더 커요.`,
+      setup(v,box,submit){drawLine(v,{d,marks:[{n:a,color:"var(--t-blue)",label:"가",up:true},{n:b,color:"var(--t-red)",label:"나",up:false}]});optionBtns(box,signOpts,cmp(a,b),ok=>submit(ok),{game:true})}}}
+};
+let bag=[];
+function nextType(){if(!bag.length)bag=shuffle(Object.keys(gameTypes));return bag.pop()}
+function startGame(){Object.assign(G,{on:true,lives:3,score:0,combo:0,step:0,locked:false,right:0});bag=[];$("#intro").hidden=true;$("#v4").style.display="block";gameQ()}
+function gameQ(){
+  G.locked=false;$("#f4").className="fb";$("#f4").innerHTML="";$("#n4").hidden=true;
+  const lv=Math.floor(G.step/3),type=nextType();let d=pickD(lv);if(type.startsWith("line"))d=Math.max(3,d);
+  const q=gameTypes[type](d);G.q=q;
+  $("#gstep").textContent=`${G.step+1}번째 칸 · ${q.tag}`;$("#q4").innerHTML=q.text;
+  drawPath();hud();
+  q.setup($("#v4"),$("#a4"),(ok,extra)=>{
+    if(G.locked)return;G.locked=true;stopTimer();
+    if(ok){const bonus=Math.round(timeLeft()*5),c=G.combo*20;G.combo++;G.right++;G.step++;G.score+=100+bonus+c;
+      fb("#f4",true,`정답! +${100+bonus+c}점`,`기본 100 · 시간 보너스 ${bonus}${c?` · 콤보 ${c}`:""}<br>${q.why}`);}
+    else{G.lives--;G.combo=0;fb("#f4",false,"아쉬워요! 목숨 -1",(extra?extra+" ":"")+q.why);}
+    drawPath();hud();
+    if(G.step>=G.total||G.lives<=0){$("#n4").textContent="결과 보기 ▶"}else $("#n4").textContent=ok?"다음 칸으로 ▶":"다시 도전 ▶";
+    $("#n4").hidden=false;$("#n4").focus();
+  });
+  startTimer();
+}
+function endGame(){
+  stopTimer();G.on=false;const win=G.step>=G.total;
+  if(G.score>best){best=G.score;try{localStorage.setItem("fraction-best",best)}catch(e){}}
+  const stars=win?(G.lives===3?3:G.lives===2?2:1):0;
+  $("#v4").style.display="none";const box=$("#intro");box.hidden=false;
+  box.innerHTML=`<h2>${win?"깃발에 도착했어요! 🏁":"탐험이 끝났어요"}</h2>
+    <div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?"":"off"}">★</span>`).join("")}</div>
+    <p>${G.right}문제를 맞혀 <b>${G.score}점</b>을 얻었어요. ${win?"":`깃발까지 ${G.total-G.step}칸 남았어요. 1~3번 활동에서 연습하고 다시 도전해 보세요.`}</p>
+    <button class="btn go" id="again">다시 탐험하기</button>`;
+  $("#again").onclick=startGame;
+  $("#gstep").textContent="게임 끝";$("#q4").innerHTML=win?"분수 탐험 성공!":"다시 도전해 보세요!";$("#a4").innerHTML="";$("#f4").className="fb";$("#f4").innerHTML="";$("#n4").hidden=true;hud();
+}
+$("#n4").onclick=()=>{if(G.step>=G.total||G.lives<=0)endGame();else gameQ()};
+$("#start").onclick=startGame;
+$("#v4").style.display="none";
+
+new1();new2();new3();drawPath();hud();
+</script>
+
+</body></html>
